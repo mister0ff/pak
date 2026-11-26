@@ -22,3 +22,7 @@ Esta edição removeu a compilação NDK, hooks, patching e acesso à memória d
 
 ## Base e licença
 A estrutura original recebida continha componentes LGL/Android e bibliotecas nativas de hooking/memória. Esta edição reaproveita somente a estrutura Android básica e substitui o menu por um laboratório independente. Consulte `LICENSE` para os termos herdados da base; mantenha os avisos de autoria aplicáveis.
+
+## GitHub Actions
+O workflow `.github/workflows/main.yml` usa o Gradle Wrapper do próprio projeto (Gradle 8.7) e JDK 17. Não execute `gradle 6.5` manualmente: essa versão não reconhece `dependencyResolutionManagement`, usado em `settings.gradle`.
+O APK de depuração é publicado como artefato `AimLab-Controlled-debug` na execução do workflow.
