@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>AimLab Controlled</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#141d32;--line:#263653;--cyan:#53e0d0;--pink:#ff6f91}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#eaf1ff;font:14px system-ui;overflow:hidden}
+header{height:54px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;background:#10182a;border-bottom:1px solid var(--line)}
+h1{font-size:17px;margin:0}small{color:#94a7c7}.tag{color:var(--cyan);font-size:11px}
+main{display:grid;grid-template-columns:minmax(0,1fr) 270px;height:calc(100dvh - 54px)}
+#stage{position:relative;min-width:0;background:radial-gradient(ellipse at center,#192b42,#080d18);overflow:hidden}
+canvas{width:100%;height:100%;display:block;touch-action:manipulation}
+#hud{position:absolute;left:10px;top:10px;background:#0b1220c9;padding:8px 10px;border:1px solid #334760;border-radius:9px;font-size:12px;pointer-events:none}
+aside{background:var(--panel);border-left:1px solid var(--line);padding:14px;overflow:auto}
+section{border-bottom:1px solid var(--line);padding:0 0 13px;margin-bottom:13px}
+h2{font-size:13px;margin:0 0 10px;color:var(--cyan);letter-spacing:.5px}
+label{display:flex;justify-content:space-between;gap:8px;margin:10px 0 5px;color:#c7d4ea}
+input[type=range]{width:100%;accent-color:var(--cyan)}input[type=checkbox]{accent-color:var(--cyan);transform:scale(1.1)}
+button,select{background:#243653;color:#fff;border:1px solid #3a5275;border-radius:8px;padding:9px 11px;font-weight:600}
+button:active{transform:scale(.98)}.row{display:flex;gap:7px;flex-wrap:wrap}.row button{flex:1}
+.metric{display:inline-block;background:#0d1728;padding:6px 8px;border-radius:7px;margin:3px 3px 0 0;color:#a9bddb}
+.note{font-size:11px;line-height:1.45;color:#92a5c4}
+@media(max-width:700px){main{grid-template-columns:1fr;grid-template-rows:minmax(220px,1fr) auto}aside{max-height:42dvh;border-left:0;border-top:1px solid var(--line);padding:10px 13px}section{padding-bottom:8px;margin-bottom:8px}label{margin:6px 0 3px}}
+</style></head><body>
+<header><div><h1>AimLab <span class="tag">CONTROLLED RANGE</span></h1><small>Simulador local • alvos fictícios</small></div><div id="status" class="tag">● PRONTO</div></header>
+<main><div id="stage"><canvas id="game"></canvas><div id="hud">Alvos: <b id="count">0</b><br>Acertos: <b id="hits">0</b><br>Precisão: <b id="acc">0%</b></div></div>
+<aside>
+<section><h2>》CENÁRIO DE TESTE</h2><div class="row"><button id="spawn">+ Criar alvos</button><button id="reset">Reiniciar</button></div><label>Quantidade <b id="numv">6</b></label><input id="num" type="range" min="1" max="15" value="6"><label>Movimento dos alvos <b id="speedv">1.0x</b></label><input id="speed" type="range" min="0" max="30" value="10"></section>
+<section><h2>》AIM MOD — SIMULADO</h2><label><span><input id="assist" type="checkbox" checked> Atração da mira</span></label><label>Força magnética <b id="forcev">35%</b></label><input id="force" type="range" min="0" max="100" value="35"><label>Raio de aquisição <b id="fovv">120 px</b></label><input id="fov" type="range" min="20" max="260" value="120"><p class="note">A assistência só altera a mira dentro deste simulador e sobre os círculos de treino.</p></section>
+<section><h2>》PLAYER OUTLINES</h2><label><span><input id="boxes" type="checkbox" checked> Contorno dos alvos</span></label><label><span><input id="lines" type="checkbox" checked> Linhas até os alvos</span></label><label><span><input id="through" type="checkbox" checked> Mostrar através das paredes simuladas</span></label><label><span><input id="distance" type="checkbox" checked> Distância fictícia</span></label><p class="note">Os obstáculos e alvos são desenhados pelo próprio laboratório; não há leitura de tela, memória ou dados de outro aplicativo.</p></section>
+<section><h2>》ESTATÍSTICAS</h2><span class="metric">Tempo: <b id="time">0.0s</b></span><span class="metric">Erros: <b id="miss">0</b></span><div class="row" style="margin-top:9px"><button id="practice">Iniciar treino</button><button id="clear">Limpar alvos</button></div></section>
+<p class="note">Uso: toque/clique nos alvos para acertar. Arraste no cenário para mover a mira. Projeto de código aberto baseado na estrutura Android fornecida; módulo nativo de hooks removido nesta edição.</p>
+</aside></main>
+<script>
+(()=>{const c=document.querySelector('#game'),ctx=c.getContext('2d'),$=id=>document.getElementById(id);
+let W=0,H=0,targets=[],shots=0,hits=0,miss=0,aim={x:0,y:0},running=true,start=performance.now(),last=0,obstacle={x:0,y:0,w:0,h:0};
+function resize(){let r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;c.width=W*d;c.height=H*d;ctx.setTransform(d,0,0,d,0,0);obstacle={x:W*.43,y:H*.28,w:W*.14,h:H*.42};if(!aim.x){aim.x=W/2;aim.y=H/2}}
+window.addEventListener('resize',resize);resize();
+function add(n=+$('num').value){for(let i=0;i<n;i++)targets.push({x:40+Math.random()*(W-80),y:40+Math.random()*(H-80),r:13+Math.random()*8,vx:(Math.random()-.5)*1.8,vy:(Math.random()-.5)*1.8,hp:1})}
+function update(dt){let sp=+$('speed').value/10;targets.forEach(t=>{t.x+=t.vx*sp*dt*60;t.y+=t.vy*sp*dt*60;if(t.x<t.r||t.x>W-t.r)t.vx*=-1;if(t.y<t.r||t.y>H-t.r)t.vy*=-1;t.x=Math.max(t.r,Math.min(W-t.r,t.x));t.y=Math.max(t.r,Math.min(H-t.r,t.y))});
+ if($('assist').checked){let f=+$('force').value/100,rad=+$('fov').value,near=null,nd=rad;for(const t of targets){let d=Math.hypot(t.x-aim.x,t.y-aim.y);if(d<nd){near=t;nd=d}}if(near){let k=f*.18;aim.x+=(near.x-aim.x)*k;aim.y+=(near.y-aim.y)*k}}
+}
+function draw(){ctx.clearRect(0,0,W,H);ctx.strokeStyle='#1d3048';ctx.lineWidth=1;for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+ // simulated obstacle is a visual occluder only
+ ctx.fillStyle='#344258';ctx.fillRect(obstacle.x,obstacle.y,obstacle.w,obstacle.h);ctx.strokeStyle='#60718b';ctx.strokeRect(obstacle.x,obstacle.y,obstacle.w,obstacle.h);ctx.fillStyle='#9aabc1';ctx.font='10px system-ui';ctx.fillText('OBSTÁCULO DE TESTE',obstacle.x-15,obstacle.y-7);
+ const through=$('through').checked;
+ targets.forEach((t,i)=>{let occluded=t.x>obstacle.x&&t.x<obstacle.x+obstacle.w&&t.y>obstacle.y&&t.y<obstacle.y+obstacle.h;if(occluded&&!through)return;
+ let col=occluded?'#ffb454':'#53e0d0';if($('lines').checked){ctx.strokeStyle=col+'99';ctx.beginPath();ctx.moveTo(W/2,H);ctx.lineTo(t.x,t.y);ctx.stroke()}
+ if($('boxes').checked){ctx.strokeStyle=col;ctx.lineWidth=2;ctx.strokeRect(t.x-t.r-5,t.y-t.r-7,(t.r+5)*2,(t.r+7)*2)}
+ ctx.fillStyle=col+'33';ctx.beginPath();ctx.arc(t.x,t.y,t.r,0,Math.PI*2);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();
+ ctx.fillStyle='#eaf1ff';ctx.font='11px system-ui';ctx.fillText('ALVO '+(i+1),t.x-t.r,t.y-t.r-12);if($('distance').checked)ctx.fillText(Math.round(8+Math.hypot(t.x-W/2,t.y-H/2)/12)+' m*',t.x-t.r,t.y+t.r+17);
+ });
+ let fov=+$('fov').value;ctx.strokeStyle='#53e0d077';ctx.setLineDash([5,5]);ctx.beginPath();ctx.arc(aim.x,aim.y,fov,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+ ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(aim.x-12,aim.y);ctx.lineTo(aim.x+12,aim.y);ctx.moveTo(aim.x,aim.y-12);ctx.lineTo(aim.x,aim.y+12);ctx.stroke();
+ $('count').textContent=targets.length;$('hits').textContent=hits;$('miss').textContent=miss;$('acc').textContent=(shots?Math.round(hits/shots*100):0)+'%';$('time').textContent=((performance.now()-start)/1000).toFixed(1)+'s';
+}
+function loop(ts){let dt=Math.min((ts-last)/16.67||1,2);last=ts;if(running)update(dt);draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+function pos(e){let r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+c.addEventListener('pointerdown',e=>{let p=pos(e);aim=p;let idx=targets.findIndex(t=>Math.hypot(t.x-p.x,t.y-p.y)<t.r+12);shots++;if(idx>=0){hits++;targets.splice(idx,1)}else miss++});
+c.addEventListener('pointermove',e=>{if(e.buttons){aim=pos(e)}});
+$('spawn').onclick=()=>add();$('reset').onclick=()=>{targets=[];hits=shots=miss=0;start=performance.now();add()};$('clear').onclick=()=>targets=[];$('practice').onclick=()=>{running=!running;$('practice').textContent=running?'Pausar treino':'Continuar treino'};
+[['num','numv',v=>v],['speed','speedv',v=>(v/10).toFixed(1)+'x'],['force','forcev',v=>v+'%'],['fov','fovv',v=>v+' px']].forEach(([a,b,fmt])=>$(a).oninput=()=>$(b).textContent=fmt(+$ (a).value));
+add();})();
+</script></body></html>
