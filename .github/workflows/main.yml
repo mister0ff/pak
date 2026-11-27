@@ -21,13 +21,20 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Build with the repository Gradle Wrapper
-        run: |
-          chmod +x ./gradlew
-          ./gradlew --version
-          ./gradlew --no-daemon clean assembleDebug
+      # O ZIP não contém gradle-wrapper.jar. Instala Gradle 8.7
+      # e recria o wrapper antes de chamar ./gradlew.
+      - name: Set up Gradle 8.7
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
 
-      - name: Upload debug APK
+      - name: Regenerate missing Gradle wrapper
+        run: gradle wrapper --gradle-version 8.7 --distribution-type bin
+
+      - name: Build debug APK
+        run: ./gradlew --no-daemon clean assembleDebug
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: AimLab-Controlled-debug

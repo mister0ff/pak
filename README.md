@@ -22,3 +22,6 @@ Esta edição removeu a compilação NDK, hooks, patching e acesso à memória d
 
 ## Base e licença
 A estrutura original recebida continha componentes LGL/Android e bibliotecas nativas de hooking/memória. Esta edição reaproveita somente a estrutura Android básica e substitui o menu por um laboratório independente. Consulte `LICENSE` para os termos herdados da base; mantenha os avisos de autoria aplicáveis.
+
+## Correção do Gradle Wrapper
+O arquivo `gradle-wrapper.jar` não estava incluído no ZIP anterior. O workflow agora instala Gradle 8.7, recria o wrapper e só então executa `./gradlew clean assembleDebug`.
