@@ -1,7 +1,0 @@
-# Outline rendering options
-module: outlines
-enabled: true
-thickness_dp: 2
-show_labels: true
-show_health_bar: true
-corner_style: true
