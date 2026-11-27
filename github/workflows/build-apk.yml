@@ -1,0 +1,44 @@
+name: Build AimLab APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Instala Gradle 8.7 (necessário para AGP 8.5)
+      - name: Set up Gradle 8.7
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      # Recria o wrapper caso esteja ausente
+      - name: Regenerate missing Gradle wrapper
+        run: gradle wrapper --gradle-version 8.7 --distribution-type bin
+
+      # Build do APK (Debug para teste rápido, Release para produção)
+      # O Gradle baixará o NDK automaticamente se não estiver no cache local
+      - name: Build debug APK
+        run: ./gradlew --no-daemon clean assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AimLab-Controlled-debug
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
