@@ -21,18 +21,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # Instala Gradle 8.7 (necessário para AGP 8.5)
       - name: Set up Gradle 8.7
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
 
-      # Recria o wrapper caso esteja ausente
       - name: Regenerate missing Gradle wrapper
         run: gradle wrapper --gradle-version 8.7 --distribution-type bin
 
-      # Build do APK (Debug para teste rápido, Release para produção)
-      # O Gradle baixará o NDK automaticamente se não estiver no cache local
       - name: Build debug APK
         run: ./gradlew --no-daemon clean assembleDebug
 
