@@ -1,7 +1,8 @@
-# Aim-assist algorithm for synthetic training targets only
+# Aim-assist for synthetic training targets
 module: aim
 enabled: true
 fov_degrees: 18
 smoothing: 0.22
 max_step: 0.08
 target_bone: center
+visibility_check: true

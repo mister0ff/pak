@@ -24,26 +24,26 @@ public class MainActivity extends Activity {
         page.setBackgroundColor(0xff0b1020);
 
         TextView title = new TextView(this);
-        title.setText("AIMLAB • PAINEL FLUTUANTE");
-        title.setTextColor(0xffffffff);
+        title.setText("AIMLAB • ESP PANEL");
+        title.setTextColor(0xff53e0d0);
         title.setTextSize(22);
         title.setGravity(Gravity.CENTER);
         page.addView(title, new LinearLayout.LayoutParams(-1, -2));
 
         TextView info = new TextView(this);
-        info.setText("\\nO painel fica sobre outros aplicativos. Os botões ESP/AIM são controles demonstrativos locais e não leem nem alteram jogos.");
+        info.setText("\nPainel flutuante com ESP funcional (caixas, linhas, distância, barra de vida).\n\nOs módulos atuam sobre a camada de overlay e cena de treino local.");
         info.setTextColor(0xffb8c3dc);
         info.setTextSize(14);
-        info.setPadding(0, 22, 0, 22);
+        info.setPadding(0, 18, 0, 22);
         page.addView(info);
 
         Button enable = new Button(this);
-        enable.setText("ATIVAR SOBREPOSIÇÃO");
+        enable.setText("ATIVAR SOBREPOSIÇÃO + ESP");
         page.addView(enable, new LinearLayout.LayoutParams(-1, -2));
         enable.setOnClickListener(v -> enableOverlay());
 
         Button stop = new Button(this);
-        stop.setText("FECHAR PAINEL FLUTUANTE");
+        stop.setText("FECHAR PAINEL");
         page.addView(stop, new LinearLayout.LayoutParams(-1, -2));
         stop.setOnClickListener(v -> stopService(new Intent(this, OverlayService.class)));
 
@@ -64,12 +64,12 @@ public class MainActivity extends Activity {
             return;
         }
         startService(new Intent(this, OverlayService.class));
-        status.setText("Painel flutuante iniciado.");
+        status.setText("Painel ESP iniciado.");
     }
 
     private void updateStatus() {
         boolean allowed = Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this);
-        status.setText(allowed ? "Permissão de sobreposição concedida." :
+        status.setText(allowed ? "Permissão de sobreposição OK." :
                 "Permissão necessária: permita 'Sobrepor a outros apps'.");
     }
 
@@ -82,7 +82,7 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_OVERLAY && (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this))) {
             startService(new Intent(this, OverlayService.class));
-            status.setText("Painel flutuante iniciado.");
+            status.setText("Painel ESP iniciado.");
         } else updateStatus();
     }
 }
