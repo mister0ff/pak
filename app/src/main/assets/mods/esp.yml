@@ -1,0 +1,7 @@
+# Local practice scene only; no game-process access
+module: esp
+enabled: true
+draw_boxes: true
+draw_snaplines: true
+show_distance: true
+max_targets: 8

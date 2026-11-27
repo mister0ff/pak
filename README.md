@@ -25,3 +25,17 @@ A estrutura original recebida continha componentes LGL/Android e bibliotecas nat
 
 ## Correção do Gradle Wrapper
 O arquivo `gradle-wrapper.jar` não estava incluído no ZIP anterior. O workflow agora instala Gradle 8.7, recria o wrapper e só então executa `./gradlew clean assembleDebug`.
+
+
+## Painel flutuante Android
+- Solicita permissão `Sobrepor a outros apps` e inicia um painel `TYPE_APPLICATION_OVERLAY`.
+- O painel pode ser arrastado, minimizado e fechado.
+- Botões ESP/AIM apenas alternam estados demonstrativos locais; não acessam nem modificam Free Fire ou qualquer outro processo.
+- Modelos vazios em `app/src/main/assets/mods/`: `esp.yml`, `aimbot.yml`, `player_outlines.yml`, `overlay.yml`.
+
+
+## Módulos funcionais locais (versão de teste)
+- `ModuleConfig.java` carrega o subconjunto YAML plano (`chave: valor`) de `assets/mods/`.
+- `PracticeAimEngine.java` implementa suavização e limite de passo para coordenadas normalizadas de alvos sintéticos da própria cena de treino.
+- `OverlayService.java` carrega os YAML, mantém os estados ESP/AIM em `SharedPreferences` e exibe o estado no painel flutuante.
+- Os módulos atuam somente na cena de treino da aplicação. Não leem memória, não injetam código e não controlam jogos ou processos externos.

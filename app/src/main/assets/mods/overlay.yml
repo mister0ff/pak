@@ -1,0 +1,6 @@
+# AimLab local overlay settings
+module: overlay
+enabled: true
+panel_width_dp: 270
+start_x_dp: 18
+start_y_dp: 110

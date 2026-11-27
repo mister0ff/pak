@@ -1,0 +1,5 @@
+# Outline rendering options for the app's own practice scene
+module: outlines
+enabled: true
+thickness_dp: 2
+show_labels: true
